@@ -12,6 +12,7 @@ $.addEventListener('click', e =>
 
 	if (element.matches("#no"))
 	{
+		title.setAttribute("contenteditable", false);
 		title.innerHTML = 'Resposta correta!';
 		buttons.style.display = 'none';
 	}
