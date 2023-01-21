@@ -1,40 +1,63 @@
 
 const $ = document;
-
+const buttons = $.querySelector('.buttons');
 const [yes, no, title] = ['yes', 'no', 'title'].map(id => $.getElementById(id));
 
-const buttons = $.querySelector('.buttons');
-
+let cloned = false;
 
 $.addEventListener('click', e =>
 {
-	let element = e.target;
+	e = e.target;
 
-	if (element.matches("#no"))
-	{
-		title.setAttribute("contenteditable", false);
+	if (e.matches("#no"))                               
+	{                                                   
+		title.setAttribute("contenteditable", false);   
 		title.innerHTML = 'Resposta correta!';
 		buttons.style.display = 'none';
 	}
-	
-	if (element.matches("#yes"))
+	if (e.matches("#yes"))
 	{
+		let { width: button_width, height: button_height } = getDimensions(e);
+		let { innerWidth: body_width, innerHeight: body_height } = window;
 
-		let { top, left } = element.style;
+		let top  = rng(0, body_height - button_height);
+		let left = rng(0, body_width  - button_width );
 
-		top  = (rng(200, 100)) * randomSign();
-		left = (rng(200, 100)) * randomSign();
+		// When #yes becomes absolutely positioned, the other button moves.
+		// The easiest way to prevent that is by creating a copy of the button
+		// and have it take its place.
+		if (!cloned)
+		{
+			// I could track the state with querySelector(), but I think this is
+			// better.
+			cloned = true;
 
-		element.style.top = `${ top  }px`;
-		element.style.left= `${ left }px`;
+			let clone = e.cloneNode(true);
+
+			clone.id = 'clone';
+			clone.style.opacity = '0';
+			buttons.prepend(clone);
+		}
+		e.style.position = 'absolute';
+		e.style.top = `${top}px`;
+		e.style.left= `${left}px`;
 	}
 });
 
-// Helper Functions -------------------------------------------------------------
 
-function randomSign()
+
+// Helper Function 😳 -----------------------------------------------------------
+
+function getDimensions(element)
 {
-	return rng(1) ? 1 : -1; 
+	const pattern = /\-?(\d+(\.\d+)?|\.d+)/;
+
+	let { width, height } = getComputedStyle(element);
+
+	width = +width.match(pattern)[0];
+	height = +height.match(pattern)[0];
+
+	return { width, height }
 }
 
 function rng(max = 100, min = 0)
